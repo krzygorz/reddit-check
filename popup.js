@@ -35,11 +35,7 @@ function processPosts(redditPosts, encodedUrl, title) {
 }
 
 function makeDisplay(redditPosts, encodedUrl, title) {
-    var now = new Date();
-    var date_now = new Date(now.getUTCFullYear(), now.getUTCMonth(), 
-        now.getUTCDate(),  now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds()); 
     var date_entry; 
-    var one_day = 86400000; // milliseconds per day
     var resubmitUrl = "https://www.reddit.com/submit?resubmit=true&url=" + encodedUrl;
     redditPosts.sort(comparePosts)
     var permalinks = [];
@@ -49,7 +45,7 @@ function makeDisplay(redditPosts, encodedUrl, title) {
                 link: entry.data.permalink,
                 title: entry.data.title,
                 score: entry.data.score+"",
-                age: (date_now-date_entry)/one_day,
+                date: date_entry,
                 comments: entry.data.num_comments+"",
                 subreddit: entry.data.subreddit,
             };
@@ -72,8 +68,8 @@ function makeDisplay(redditPosts, encodedUrl, title) {
             "<div class='score'>"+permalink.score+"</div>"+
             " <a href='" + url + "' title='" + permalink.link + "' target='_blank' >"+
               permalink.title + "</a>"+
-            "<div class='age'>" + getAge(permalink.age)+ 
-             " ,&nbsp;&nbsp;" + permalink.comments + " comments,"+
+            "<div class='age'>" + timeSince(permalink.date) +
+             " ago,&nbsp;&nbsp;" + permalink.comments + " comments,"+
              "&nbsp;&nbsp;r/" + permalink.subreddit +
             "</div>"+
             "</li>"
@@ -85,9 +81,31 @@ function comparePosts(postA, postB) {
     return postB.data.score - postA.data.score
 }
 
-function getAge (days) {
-    var age = days.toFixed(1) + " days ago";
-    return age;
+// https://stackoverflow.com/a/3177838
+function timeSince(date) {
+    var seconds = Math.floor((new Date() - date) / 1000);
+    var interval = Math.floor(seconds / 31536000);
+
+    if (interval > 1) {
+        return interval + " years";
+    }
+    interval = Math.floor(seconds / 2592000);
+    if (interval > 1) {
+        return interval + " months";
+    }
+    interval = Math.floor(seconds / 86400);
+    if (interval > 1) {
+        return interval + " days";
+    }
+    interval = Math.floor(seconds / 3600);
+    if (interval > 1) {
+        return interval + " hours";
+    }
+    interval = Math.floor(seconds / 60);
+    if (interval > 1) {
+        return interval + " minutes";
+    }
+    return Math.floor(seconds) + " seconds";
 }
        
 document.addEventListener('DOMContentLoaded',function () {
